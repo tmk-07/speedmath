@@ -14,7 +14,7 @@ export function LandingPage({ presets, activePresetId, onSelectPreset, onStart, 
       <Card className="mm-landing-card">
         <Eyebrow>Mental Math Drill</Eyebrow>
         <h1 className="mm-title">
-          SPEED<span className="mm-title-accent">MATH</span>
+          SYN<span className="mm-title-accent">APSE</span>
         </h1>
         <p className="mm-subtitle">
           Answer as many problems as you can before the clock runs out. Configure operations,

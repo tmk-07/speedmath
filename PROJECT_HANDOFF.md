@@ -1,10 +1,12 @@
-# Speed Math Project Handoff
+# Synapse Project Handoff
 
-This is the living handoff document for the Speed Math mental math game. Update it whenever product rules, display preferences, persistence choices, or code structure changes so another LLM or developer can continue without re-discovering the project.
+This is the living handoff document for Synapse, a mental math game. Update it whenever product rules, display preferences, persistence choices, or code structure changes so another LLM or developer can continue without re-discovering the project.
 
 ## Product Goal
 
-Speed Math is a fast mental arithmetic drill game inspired by timed arithmetic practice. The game should stay simple, direct, and data-focused. Analytics are a core part of the product, not an afterthought.
+Synapse is a fast mental arithmetic drill game inspired by timed arithmetic practice. The game should stay simple, direct, and data-focused. Analytics are a core part of the product, not an afterthought.
+
+The displayed site/app name is `Synapse`. Keep folder names, repo names, storage keys, and Cloudflare project identifiers unchanged unless the user explicitly asks to rename those too.
 
 Primary goals:
 
