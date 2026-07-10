@@ -58,12 +58,6 @@ export function computeAnalytics(attempts) {
 
   const weakAreas = [];
   const minAttempts = 3;
-  OP_ORDER.forEach((op) => {
-    const stats = byOperation[op];
-    if (stats.attempted >= minAttempts) {
-      weakAreas.push({ label: OP_META[op].label, stats, color: OP_META[op].color });
-    }
-  });
 
   [
     ["addition", "regrouping", "Addition w/ regrouping"],
@@ -78,13 +72,15 @@ export function computeAnalytics(attempts) {
   });
 
   Object.entries(multiplication).forEach(([k, stats]) => {
-    if (stats.attempted >= minAttempts) {
+    const factor = Number(k);
+    if (factor >= 1 && factor <= 12 && stats.attempted >= minAttempts) {
       weakAreas.push({ label: `\u00D7${k}`, stats, color: OP_META.multiplication.color });
     }
   });
 
   Object.entries(division).forEach(([k, stats]) => {
-    if (stats.attempted >= minAttempts) {
+    const divisor = Number(k);
+    if (divisor >= 1 && divisor <= 12 && stats.attempted >= minAttempts) {
       weakAreas.push({ label: `\u00F7${k}`, stats, color: OP_META.division.color });
     }
   });

@@ -201,6 +201,9 @@ Multiplication and division factor grids:
 
 Slowest areas:
 
+- Rank only subcategories, not whole-operation averages.
+- Addition/subtraction candidates are regrouping/borrowing and no-regrouping/no-borrowing buckets.
+- Multiplication/division candidates are factor/divisor buckets from 1 through 12.
 - Do not show rank numbers.
 - Display the average time first, then the area label.
 - Example layout: `4.5s x12`, with a colored bar underneath.
@@ -243,6 +246,8 @@ Generated-code sync:
 - On local preview, sync has a browser-only fallback so the flow can be tested without Cloudflare.
 - On Cloudflare, sync should use Pages Functions and D1.
 - The required D1 binding name is `DB`.
+- `wrangler.toml` declares the D1 binding with database name `d1-synapse` and database id `3fedf6c0-7445-4a28-8a2d-c5f15f668b2c`.
+- If Cloudflare shows a "Cloud sync needs a Cloudflare D1 binding named DB" error, the app code is deployed but the Pages project still needs the D1 database binding and migration.
 
 ## Preset Editing
 
@@ -273,7 +278,7 @@ Before deploying generated-code sync:
 
 1. Create a D1 database.
 2. Run the migration SQL.
-3. Bind the database to the Pages project as `DB`.
+3. Bind the database to the Pages project as `DB` through `wrangler.toml`.
 4. Deploy the Pages project.
 
 ## Current Product Decisions To Preserve

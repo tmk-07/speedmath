@@ -29,7 +29,7 @@ export function validateProgress(progress) {
 
 export function requireDb(env) {
   if (!env.DB) {
-    return json({ error: "Cloud sync is not configured yet." }, { status: 503 });
+    return json({ error: "Cloud sync needs a Cloudflare D1 binding named DB." }, { status: 503 });
   }
   return null;
 }
