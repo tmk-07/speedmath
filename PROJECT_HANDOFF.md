@@ -261,6 +261,8 @@ The app is Cloudflare Pages-friendly:
 
 - Vite builds static assets into `dist`.
 - Cloudflare Pages can serve the static app.
+- Cloudflare must deploy the built `dist` directory, not the repo root. If it serves the repo root, the browser will try to load `/src/main.jsx` and fail with a `text/jsx` MIME error.
+- `wrangler.toml` sets `pages_build_output_dir = "dist"` as an extra guardrail.
 - Pages Functions in `functions/api/sync` provide the optional sync API.
 - D1 migration is in `migrations/0001_progress_codes.sql`.
 
