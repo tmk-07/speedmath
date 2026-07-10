@@ -183,6 +183,7 @@ Summary:
 - Use average response time.
 - By-operation summary bars should use operation colors.
 - Addition/subtraction breakdown bars should use the relevant operation color.
+- Addition and subtraction breakdown cards may sit side by side, but their internal stat rows must use compact columns so nothing protrudes beyond the card edge.
 
 Multiplication and division factor grids:
 

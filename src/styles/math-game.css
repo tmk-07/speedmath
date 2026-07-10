@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 
+html, body, #root {
+  min-height: 100%;
+  margin: 0;
+  background: #0B0E13;
+}
+
 .mm-app {
   --bg: #0B0E13;
   --panel: #141922;
@@ -227,6 +233,13 @@
 .mm-bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
 
 .mm-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.mm-two-col > .mm-card { min-width: 0; }
+.mm-two-col .mm-op-row {
+  grid-template-columns: minmax(92px, 1fr) minmax(44px, 0.75fr) auto;
+  gap: 8px;
+}
+.mm-two-col .mm-op-row > * { min-width: 0; }
+.mm-two-col .mm-op-row-meta { min-width: 48px; }
 .mm-factor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 10px; }
 .mm-factor-cell { background: var(--panel-alt); border: 1px solid var(--border); border-radius: 9px; padding: 10px; }
 .mm-factor-head { font-family: 'IBM Plex Mono', monospace; font-size: 13px; margin-bottom: 6px; }
