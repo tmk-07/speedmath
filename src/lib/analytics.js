@@ -57,7 +57,7 @@ export function computeAnalytics(attempts) {
   const division = factorMap("division", "divisor");
 
   const weakAreas = [];
-  const minAttempts = 3;
+  const minAttempts = 1;
 
   [
     ["addition", "regrouping", "Addition w/ regrouping"],

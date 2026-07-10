@@ -204,6 +204,7 @@ Slowest areas:
 - Rank only subcategories, not whole-operation averages.
 - Addition/subtraction candidates are regrouping/borrowing and no-regrouping/no-borrowing buckets.
 - Multiplication/division candidates are factor/divisor buckets from 1 through 12.
+- Include any subcategory with at least one attempt; do not hide slow buckets behind a multi-attempt threshold.
 - Do not show rank numbers.
 - Display the average time first, then the area label.
 - Example layout: `4.5s x12`, with a colored bar underneath.
