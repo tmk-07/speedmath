@@ -7,8 +7,8 @@ import { ResultsPage } from "./features/results/ResultsPage.jsx";
 import { SettingsPage } from "./features/settings/SettingsPage.jsx";
 import { uid } from "./lib/id.js";
 import { loadProgress, progressPayload, saveProgress } from "./lib/progressStorage.js";
-import { makeDefaultPreset, clonePreset } from "./lib/presets.js";
-import { saveSyncCode } from "./lib/syncApi.js";
+import { ensureBuiltInPresets, makeInitialPresets, clonePreset } from "./lib/presets.js";
+import { saveAccountProgress } from "./lib/syncApi.js";
 
 export default function App() {
   const [savedProgress] = useState(() => loadProgress());
@@ -19,13 +19,14 @@ export default function App() {
   const [lastSession, setLastSession] = useState(null);
   const [gameKey, setGameKey] = useState(0);
   const [syncCode, setSyncCode] = useState(savedProgress.syncCode);
+  const [syncAccount, setSyncAccount] = useState(savedProgress.syncAccount);
   const [syncStatus, setSyncStatus] = useState("");
 
   const activePreset = presets.find((preset) => preset.id === activePresetId) || presets[0];
   const allAttempts = useMemo(() => sessions.flatMap((session) => session.attempts), [sessions]);
   const currentProgress = useMemo(
-    () => ({ presets, activePresetId, sessions, syncCode }),
-    [activePresetId, presets, sessions, syncCode]
+    () => ({ presets, activePresetId, sessions, syncCode, syncAccount }),
+    [activePresetId, presets, sessions, syncAccount, syncCode]
   );
 
   useEffect(() => {
@@ -33,21 +34,22 @@ export default function App() {
   }, [currentProgress]);
 
   useEffect(() => {
-    if (!syncCode) return undefined;
+    if (!syncAccount?.username || !syncAccount?.token) return undefined;
     const timer = setTimeout(async () => {
       try {
-        const result = await saveSyncCode(syncCode, progressPayload(currentProgress));
-        setSyncStatus(result.localOnly ? "Saved locally and to this browser preview code." : "Saved locally and to your code.");
+        const result = await saveAccountProgress(syncAccount, progressPayload(currentProgress));
+        setSyncStatus(result.localOnly ? "Saved locally and to this browser preview account." : "Saved locally and to your account.");
       } catch {
-        setSyncStatus("Saved locally. Code sync will work after the Cloudflare backend is connected.");
+        setSyncStatus("Saved locally. Sign in again to sync across devices.");
       }
     }, 900);
 
     return () => clearTimeout(timer);
-  }, [currentProgress, syncCode]);
+  }, [currentProgress, syncAccount]);
 
-  function loadProgressFromCode(progress, code) {
-    const nextPresets = Array.isArray(progress.presets) && progress.presets.length > 0 ? progress.presets : [makeDefaultPreset()];
+  function loadProgressFromAccount(progress, account) {
+    const loadedPresets = Array.isArray(progress.presets) && progress.presets.length > 0 ? progress.presets : makeInitialPresets();
+    const nextPresets = ensureBuiltInPresets(loadedPresets);
     const nextActivePresetId = nextPresets.some((preset) => preset.id === progress.activePresetId)
       ? progress.activePresetId
       : nextPresets[0].id;
@@ -56,7 +58,8 @@ export default function App() {
     setActivePresetId(nextActivePresetId);
     setSessions(Array.isArray(progress.sessions) ? progress.sessions : []);
     setLastSession(null);
-    setSyncCode(code.trim().toUpperCase().replace(/[^A-Z0-9]/g, ""));
+    setSyncAccount(account);
+    setSyncCode("");
     setView("landing");
   }
 
@@ -141,10 +144,10 @@ export default function App() {
 
         <ProgressSavePanel
           progress={progressPayload(currentProgress)}
-          syncCode={syncCode}
+          syncAccount={syncAccount}
           syncStatus={syncStatus}
-          onSetSyncCode={setSyncCode}
-          onLoadProgress={loadProgressFromCode}
+          onSetSyncAccount={setSyncAccount}
+          onLoadProgress={loadProgressFromAccount}
         />
       </div>
     </div>

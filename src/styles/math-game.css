@@ -329,10 +329,12 @@ html, body, #root {
 .mm-progress-panel-head { display: flex; justify-content: space-between; gap: 16px; }
 .mm-progress-copy { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 0 0 16px; }
 .mm-progress-actions { display: flex; flex-direction: column; gap: 10px; }
+.mm-progress-button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .mm-progress-back-row { display: flex; justify-content: flex-end; margin-top: 14px; }
 .mm-progress-back-row .mm-btn { padding: 8px 10px; }
 .mm-code-load-row { display: flex; gap: 10px; }
 .mm-code-load-row .mm-text-input { min-width: 0; }
+.mm-code-load-row .mm-pin-input { flex: 0 0 92px; text-align: center; }
 .mm-code-load-row .mm-btn { flex: 0 0 auto; }
 .mm-sync-code {
   display: flex;

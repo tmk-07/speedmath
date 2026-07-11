@@ -13,14 +13,14 @@ Primary goals:
 - Let players complete timed arithmetic sessions with automatic answer submission.
 - Preserve useful history so players can see speed trends over time.
 - Keep the UI compact, focused, and game-like rather than marketing-heavy.
-- Be easy to host on Cloudflare Pages, with optional generated-code sync for cross-device progress.
+- Be easy to host on Cloudflare Pages, with optional username/PIN account sync for cross-device progress.
 
 ## Current Tech Stack
 
 - React with Vite.
 - Plain CSS in `src/styles/math-game.css`.
 - Local browser persistence with `localStorage`.
-- Cloudflare Pages Functions plus D1 for optional generated-code sync.
+- Cloudflare Pages Functions plus D1 for optional account sync.
 
 React is currently the right choice for this MVP because the app has multiple views, stateful settings, timers, analytics, chart toggles, local storage, and future sync/login-like features. Vite produces static files that can be deployed to Cloudflare Pages.
 
@@ -61,16 +61,18 @@ npm run build
 - `src/features/results/`: End-of-game results summary.
 - `src/features/settings/`: Preset and operation configuration UI.
 - `src/features/analytics/`: Summary analytics, trend charts, factor grids, slowest areas.
-- `src/features/progress/`: "Save my progress" panel and generated-code UI.
+- `src/features/progress/`: "Save my progress" panel and username/PIN account UI.
 - `src/lib/constants.js`: Operation metadata and operation ordering.
 - `src/lib/presets.js`: Default preset and preset helpers.
 - `src/lib/problems.js`: Problem generation and answer logic.
 - `src/lib/analytics.js`: Session analytics, factor grouping, speed colors.
 - `src/lib/trends.js`: Trend chart data series.
 - `src/lib/progressStorage.js`: Local storage persistence.
-- `src/lib/syncApi.js`: Generated-code sync client and local preview fallback.
-- `functions/api/sync/`: Cloudflare Pages Functions for sync codes.
+- `src/lib/syncApi.js`: Account sync client, legacy generated-code sync client, and local preview fallbacks.
+- `functions/api/account/`: Cloudflare Pages Functions for username/PIN accounts.
+- `functions/api/sync/`: Legacy Cloudflare Pages Functions for sync codes.
 - `migrations/0001_progress_codes.sql`: D1 schema for generated-code progress sync.
+- `migrations/0002_accounts.sql`: D1 schema for username/PIN account sync.
 
 ## Game Flow
 
@@ -92,7 +94,18 @@ npm run build
 
 ## Default Preset
 
-The default preset is named `Default`.
+The first/default built-in preset is named `Easy`.
+
+Easy settings:
+
+- Duration: 120 seconds.
+- Addition: first number 2 to 10, second number 2 to 20.
+- Subtraction: first number 2 to 10, second number 2 to 20.
+- Multiplication: both factors 2 to 12.
+- Division: both generated factors 2 to 12.
+- Existing local or remote progress should be upgraded to include Easy if it is missing.
+
+The harder built-in preset is named `Default`.
 
 It should not include text such as "Zetamac style" in the visible default name.
 
@@ -228,24 +241,27 @@ Trends:
 Current model:
 
 - Progress always saves locally in the browser with `localStorage`.
-- Users can optionally choose "Save my progress" to generate or enter a code.
+- Users can optionally choose "Save my progress" to create or sign into a username/PIN account.
 - The save action should appear as small text at the bottom inside the main app container.
 - The progress panel should overlay the main app container.
 - The overlay should be opaque so underlying text does not bleed through.
 - Clicking outside the progress popup should close it.
 - The progress popup should always show a Back button at the bottom.
-- Do not show background auto-save messages like "Saved locally and to your code" inside the progress popup.
-- After generating a code in local preview, do not show the long preview-only explanatory sentence.
+- Do not show background auto-save messages like "Saved locally and to your account" inside the progress popup.
 
-Generated-code sync:
+Username/PIN account sync:
 
-- A user can generate a code to preserve progress across devices or longer term.
-- A user can enter an existing code to load progress.
-- Generating a code creates a new code linked to the current progress snapshot.
-- After a code is active, future local progress changes auto-save into that active code.
-- If the user generates another code, the app switches to the newest code; the older code remains with whatever data it last saved.
-- On local preview, sync has a browser-only fallback so the flow can be tested without Cloudflare.
-- On Cloudflare, sync should use Pages Functions and D1.
+- Users create or sign into an account with username plus 4 digit PIN.
+- Usernames are normalized lowercase and must use 3-20 letters, numbers, or underscores.
+- PINs must be exactly 4 digits.
+- Never store raw PINs in D1.
+- Store PINs as salted PBKDF2-SHA-256 hashes.
+- Store only a session token hash in D1; the browser keeps the session token in localStorage.
+- Login is rate limited to 10 failed PIN attempts per username per 15-minute window.
+- Account progress auto-saves to D1 after sign-in.
+- On local preview, account sync has a browser-only fallback so the flow can be tested without Cloudflare.
+- The old generated-code API still exists for compatibility, but it is no longer the visible product flow.
+- On Cloudflare, account sync should use Pages Functions and D1.
 - The required D1 binding name is `DB`.
 - `wrangler.toml` declares the D1 binding with database name `d1-synapse` and database id `3fedf6c0-7445-4a28-8a2d-c5f15f668b2c`.
 - If Cloudflare shows a "Cloud sync needs a Cloudflare D1 binding named DB" error, the app code is deployed but the Pages project still needs the D1 database binding and migration.
@@ -261,7 +277,7 @@ Cloudflare request behavior:
 
 - Normal gameplay does not need backend requests if progress stays local.
 - Static asset requests happen when the app loads.
-- API requests happen when a user generates a code, loads a code, or saves progress to a code.
+- API requests happen when a user creates an account, signs in, signs out, or saves progress to an account.
 - Cloudflare builds are separate from gameplay requests. Each pushed deploy can count as a build depending on the Cloudflare plan/configuration.
 
 ## Deployment Notes
@@ -272,13 +288,14 @@ The app is Cloudflare Pages-friendly:
 - Cloudflare Pages can serve the static app.
 - Cloudflare must deploy the built `dist` directory, not the repo root. If it serves the repo root, the browser will try to load `/src/main.jsx` and fail with a `text/jsx` MIME error.
 - `wrangler.toml` sets `pages_build_output_dir = "dist"` as an extra guardrail.
-- Pages Functions in `functions/api/sync` provide the optional sync API.
-- D1 migration is in `migrations/0001_progress_codes.sql`.
+- Pages Functions in `functions/api/account` provide the account sync API.
+- Legacy generated-code Pages Functions remain in `functions/api/sync`.
+- D1 migrations are in `migrations/0001_progress_codes.sql` and `migrations/0002_accounts.sql`.
 
-Before deploying generated-code sync:
+Before deploying account sync:
 
 1. Create a D1 database.
-2. Run the migration SQL.
+2. Run both migration SQL files.
 3. Bind the database to the Pages project as `DB` through `wrangler.toml`.
 4. Deploy the Pages project.
 
@@ -286,7 +303,7 @@ Before deploying generated-code sync:
 
 - Keep the app minimal and contained.
 - Analytics are important and should stay prominent.
-- Generated-code sync is preferred over full login for now.
+- Username/PIN account sync is the current cross-device persistence model.
 - Local storage remains the default automatic saving method.
 - React/Vite is acceptable and useful for this level of interactivity.
 - Avoid adding backend requests to every answer unless there is a strong product reason.

@@ -1,13 +1,14 @@
-import { makeDefaultPreset } from "./presets.js";
+import { ensureBuiltInPresets, makeInitialPresets } from "./presets.js";
 
 const STORAGE_KEY = "speedmath.progress.v1";
 
 function defaultProgress() {
   return {
-    presets: [makeDefaultPreset()],
-    activePresetId: "preset_default",
+    presets: makeInitialPresets(),
+    activePresetId: "preset_easy",
     sessions: [],
     syncCode: "",
+    syncAccount: null,
   };
 }
 
@@ -15,7 +16,8 @@ function normalizeProgress(value) {
   const fallback = defaultProgress();
   if (!value || typeof value !== "object") return fallback;
 
-  const presets = Array.isArray(value.presets) && value.presets.length > 0 ? value.presets : fallback.presets;
+  const savedPresets = Array.isArray(value.presets) && value.presets.length > 0 ? value.presets : fallback.presets;
+  const presets = ensureBuiltInPresets(savedPresets);
   const activePresetId = presets.some((preset) => preset.id === value.activePresetId)
     ? value.activePresetId
     : presets[0].id;
@@ -25,6 +27,7 @@ function normalizeProgress(value) {
     activePresetId,
     sessions: Array.isArray(value.sessions) ? value.sessions : [],
     syncCode: typeof value.syncCode === "string" ? value.syncCode : "",
+    syncAccount: value.syncAccount && typeof value.syncAccount === "object" ? value.syncAccount : null,
   };
 }
 
@@ -46,6 +49,7 @@ export function saveProgress(progress) {
         activePresetId: progress.activePresetId,
         sessions: progress.sessions,
         syncCode: progress.syncCode || "",
+        syncAccount: progress.syncAccount || null,
       })
     );
   } catch {

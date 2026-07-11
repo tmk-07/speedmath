@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { ArrowLeft, Cloud, KeyRound } from "lucide-react";
+import { ArrowLeft, LogOut, UserPlus, LogIn } from "lucide-react";
 import { Button } from "../../components/Button.jsx";
 import { Card } from "../../components/Card.jsx";
-import { createSyncCode, displayCode, loadSyncCode } from "../../lib/syncApi.js";
+import { loginAccount, logoutAccount, registerAccount } from "../../lib/syncApi.js";
 
-export function ProgressSavePanel({ progress, syncCode, onSetSyncCode, onLoadProgress }) {
+export function ProgressSavePanel({ progress, syncAccount, onSetSyncAccount, onLoadProgress }) {
   const [open, setOpen] = useState(false);
-  const [codeInput, setCodeInput] = useState("");
+  const [username, setUsername] = useState("");
+  const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -15,13 +16,18 @@ export function ProgressSavePanel({ progress, syncCode, onSetSyncCode, onLoadPro
     setMessage("");
   }
 
-  async function handleGenerateCode() {
+  function cleanPin(value) {
+    return value.replace(/[^0-9]/g, "").slice(0, 4);
+  }
+
+  async function handleCreateAccount() {
     setBusy(true);
     setMessage("");
     try {
-      const result = await createSyncCode(progress);
-      onSetSyncCode(result.code);
-      setMessage(result.localOnly ? "" : "Code created. Keep it somewhere safe so you can load this progress later.");
+      const result = await registerAccount(username, pin, progress);
+      onSetSyncAccount({ username: result.account.username, token: result.token });
+      setMessage(result.localOnly ? "Account created for this browser preview." : "Account created. Progress will sync automatically.");
+      setPin("");
     } catch (error) {
       setMessage(`${error.message} Your progress is still saved on this device.`);
     } finally {
@@ -29,22 +35,33 @@ export function ProgressSavePanel({ progress, syncCode, onSetSyncCode, onLoadPro
     }
   }
 
-  async function handleLoadCode() {
-    if (!codeInput.trim()) {
-      setMessage("Enter a code first.");
+  async function handleSignIn() {
+    if (!username.trim() || !pin.trim()) {
+      setMessage("Enter username and 4 digit PIN.");
       return;
     }
     setBusy(true);
     setMessage("");
     try {
-      const loaded = await loadSyncCode(codeInput);
-      onLoadProgress(loaded, codeInput);
-      setMessage("Progress loaded from code.");
-      setCodeInput("");
+      const result = await loginAccount(username, pin);
+      onLoadProgress(result.progress, { username: result.account.username, token: result.token });
+      setMessage("Signed in. Progress loaded.");
+      setPin("");
     } catch (error) {
-      setMessage(`${error.message} Check the code and try again.`);
+      setMessage(error.message);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleSignOut() {
+    const account = syncAccount;
+    onSetSyncAccount(null);
+    setMessage("Signed out on this device. Progress is still saved locally.");
+    try {
+      await logoutAccount(account);
+    } catch {
+      // Local sign-out should still complete even if the network is unavailable.
     }
   }
 
@@ -62,33 +79,48 @@ export function ProgressSavePanel({ progress, syncCode, onSetSyncCode, onLoadPro
                 <div>
                   <div className="mm-field-title">Progress</div>
                   <p className="mm-progress-copy">
-                    Progress saves locally on this device. To play across devices or keep progress long term, create a code and save it somewhere safe.
+                    Progress saves locally on this device. To play across devices or keep progress long term, create an account with a username and 4 digit PIN.
                   </p>
                 </div>
               </div>
 
-              {syncCode && (
+              {syncAccount?.username && (
                 <div className="mm-sync-code">
-                  <span>Your code</span>
-                  <strong>{displayCode(syncCode)}</strong>
+                  <span>Signed in</span>
+                  <strong>{syncAccount.username}</strong>
                 </div>
               )}
 
               <div className="mm-progress-actions">
-                <Button variant="primary" icon={KeyRound} onClick={handleGenerateCode} disabled={busy}>
-                  Generate Code
-                </Button>
                 <div className="mm-code-load-row">
                   <input
                     className="mm-text-input"
-                    placeholder="Enter code"
-                    value={codeInput}
-                    onChange={(event) => setCodeInput(event.target.value.toUpperCase())}
+                    placeholder="Username"
+                    autoCapitalize="none"
+                    value={username}
+                    onChange={(event) => setUsername(event.target.value)}
                   />
-                  <Button variant="secondary" icon={Cloud} onClick={handleLoadCode} disabled={busy}>
-                    Enter Code
+                  <input
+                    className="mm-text-input mm-pin-input"
+                    placeholder="PIN"
+                    inputMode="numeric"
+                    value={pin}
+                    onChange={(event) => setPin(cleanPin(event.target.value))}
+                  />
+                </div>
+                <div className="mm-progress-button-row">
+                  <Button variant="primary" icon={UserPlus} onClick={handleCreateAccount} disabled={busy}>
+                    Create Account
+                  </Button>
+                  <Button variant="secondary" icon={LogIn} onClick={handleSignIn} disabled={busy}>
+                    Sign In
                   </Button>
                 </div>
+                {syncAccount?.username && (
+                  <Button variant="ghost" icon={LogOut} onClick={handleSignOut} disabled={busy}>
+                    Sign Out
+                  </Button>
+                )}
               </div>
 
               {message && (
