@@ -100,7 +100,7 @@ The first/default built-in preset is named `Easy`.
 
 Easy settings:
 
-- Duration: 120 seconds.
+- Duration: 60 seconds.
 - Addition: first number 2 to 10, second number 2 to 20.
 - Subtraction: first number 2 to 10, second number 2 to 20.
 - Multiplication: both factors 2 to 12.

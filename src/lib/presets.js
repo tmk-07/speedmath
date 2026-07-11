@@ -2,7 +2,7 @@ export function makeEasyPreset() {
   return {
     id: "preset_easy",
     name: "Easy",
-    duration: 120,
+    duration: 60,
     operations: {
       addition: { enabled: true, aMin: 2, aMax: 10, bMin: 2, bMax: 20, regroupMode: "mixed" },
       subtraction: { enabled: true, aMin: 2, aMax: 10, bMin: 2, bMax: 20, regroupMode: "mixed" },
