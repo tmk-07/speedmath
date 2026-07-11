@@ -12,7 +12,7 @@ import {
   validatePin,
   validateProgress,
   validateUsername,
-} from "../sync/_helpers.js";
+} from "../../_shared/syncHelpers.js";
 
 export async function onRequestPost({ request, env }) {
   try {

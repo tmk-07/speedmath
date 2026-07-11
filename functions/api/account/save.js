@@ -1,4 +1,4 @@
-import { accountFromSession, accountSyncError, json, readJson, requireDb, validateProgress } from "../sync/_helpers.js";
+import { accountFromSession, accountSyncError, json, readJson, requireDb, validateProgress } from "../../_shared/syncHelpers.js";
 
 export async function onRequestPost({ request, env }) {
   try {

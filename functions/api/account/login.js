@@ -12,7 +12,7 @@ import {
   requireDb,
   validatePin,
   validateUsername,
-} from "../sync/_helpers.js";
+} from "../../_shared/syncHelpers.js";
 
 function invalidLogin() {
   return json({ error: "Invalid username or PIN." }, { status: 401 });

@@ -69,6 +69,7 @@ npm run build
 - `src/lib/trends.js`: Trend chart data series.
 - `src/lib/progressStorage.js`: Local storage persistence.
 - `src/lib/syncApi.js`: Account sync client, legacy generated-code sync client, and local preview fallbacks.
+- `functions/_shared/syncHelpers.js`: Shared Cloudflare Function helpers for JSON, D1 validation, username/PIN hashing, sessions, and rate limits.
 - `functions/api/account/`: Cloudflare Pages Functions for username/PIN accounts.
 - `functions/api/sync/`: Legacy Cloudflare Pages Functions for sync codes.
 - `migrations/0001_progress_codes.sql`: D1 schema for generated-code progress sync.
@@ -255,7 +256,7 @@ Username/PIN account sync:
 - Usernames are normalized lowercase and must use 3-20 letters, numbers, or underscores.
 - PINs must be exactly 4 digits.
 - Never store raw PINs in D1.
-- Store PINs as salted PBKDF2-SHA-256 hashes.
+- Store PINs as salted SHA-256 hashes, never as raw values.
 - Store only a session token hash in D1; the browser keeps the session token in localStorage.
 - Login is rate limited to 10 failed PIN attempts per username per 15-minute window.
 - Account progress auto-saves to D1 after sign-in.
