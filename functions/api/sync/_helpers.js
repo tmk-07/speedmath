@@ -62,19 +62,15 @@ function randomString(length, alphabet = SESSION_ALPHABET) {
   return [...bytes].map((byte) => alphabet[byte % alphabet.length]).join("");
 }
 
-function bytesToBase64(bytes) {
-  let binary = "";
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return btoa(binary);
+function bytesToHex(bytes) {
+  return [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-function base64ToBytes(value) {
-  const binary = atob(value);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
+function hexToBytes(value) {
+  const clean = String(value || "");
+  const bytes = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < clean.length; i += 2) {
+    bytes[i / 2] = Number.parseInt(clean.slice(i, i + 2), 16);
   }
   return bytes;
 }
@@ -82,7 +78,7 @@ function base64ToBytes(value) {
 export function createSalt() {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
-  return bytesToBase64(bytes);
+  return bytesToHex(bytes);
 }
 
 export function createSessionToken() {
@@ -96,18 +92,26 @@ export async function hashPin(pin, salt) {
     {
       name: "PBKDF2",
       hash: "SHA-256",
-      salt: base64ToBytes(salt),
+      salt: hexToBytes(salt),
       iterations: PIN_ITERATIONS,
     },
     key,
     256
   );
-  return bytesToBase64(new Uint8Array(bits));
+  return bytesToHex(new Uint8Array(bits));
 }
 
 export async function hashToken(token) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(token || "")));
-  return bytesToBase64(new Uint8Array(digest));
+  return bytesToHex(new Uint8Array(digest));
+}
+
+export function accountSyncError(error) {
+  const message = String(error?.message || "");
+  if (message.includes("no such table")) {
+    return json({ error: "Account database tables are missing. Run migrations/0002_accounts.sql on the D1 database." }, { status: 500 });
+  }
+  return json({ error: "Account sync failed. Check the Cloudflare Pages Function logs." }, { status: 500 });
 }
 
 export async function rateLimitError(env, username) {

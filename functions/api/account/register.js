@@ -1,4 +1,5 @@
 import {
+  accountSyncError,
   clearFailedLogins,
   createSalt,
   createSessionToken,
@@ -14,6 +15,14 @@ import {
 } from "../sync/_helpers.js";
 
 export async function onRequestPost({ request, env }) {
+  try {
+    return await handleRegister({ request, env });
+  } catch (error) {
+    return accountSyncError(error);
+  }
+}
+
+async function handleRegister({ request, env }) {
   const dbError = requireDb(env);
   if (dbError) return dbError;
 

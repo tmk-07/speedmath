@@ -1,6 +1,14 @@
-import { accountFromSession, json, readJson, requireDb, validateProgress } from "../sync/_helpers.js";
+import { accountFromSession, accountSyncError, json, readJson, requireDb, validateProgress } from "../sync/_helpers.js";
 
 export async function onRequestPost({ request, env }) {
+  try {
+    return await handleSave({ request, env });
+  } catch (error) {
+    return accountSyncError(error);
+  }
+}
+
+async function handleSave({ request, env }) {
   const dbError = requireDb(env);
   if (dbError) return dbError;
 

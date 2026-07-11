@@ -1,4 +1,5 @@
 import {
+  accountSyncError,
   clearFailedLogins,
   createSessionToken,
   hashPin,
@@ -18,6 +19,14 @@ function invalidLogin() {
 }
 
 export async function onRequestPost({ request, env }) {
+  try {
+    return await handleLogin({ request, env });
+  } catch (error) {
+    return accountSyncError(error);
+  }
+}
+
+async function handleLogin({ request, env }) {
   const dbError = requireDb(env);
   if (dbError) return dbError;
 
