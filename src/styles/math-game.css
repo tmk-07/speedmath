@@ -37,6 +37,39 @@ html, body, #root {
   position: relative;
 }
 
+.tkimify-footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 22px;
+}
+
+.tkimify-footer-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #9A9CA8;
+  opacity: 0.75;
+  text-decoration: none;
+  background: currentColor;
+  -webkit-mask: url("/tkimifylight.png") center / 14px 14px no-repeat;
+  mask: url("/tkimifylight.png") center / 14px 14px no-repeat;
+}
+
+.tkimify-footer-link:hover {
+  color: #E8B84B;
+  opacity: 1;
+}
+
+.tkimify-footer-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+  opacity: 0;
+}
+
 .mm-page, .mm-landing {
   display: flex;
   flex-direction: column;

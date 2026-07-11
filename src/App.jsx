@@ -150,6 +150,11 @@ export default function App() {
           onLoadProgress={loadProgressFromAccount}
         />
       </div>
+      <footer className="tkimify-footer">
+        <a className="tkimify-footer-link" href="https://tkimify.com" target="_blank" rel="noopener noreferrer" aria-label="tkimify">
+          <img className="tkimify-footer-icon" src="/tkimifylight.png" alt="" />
+        </a>
+      </footer>
     </div>
   );
 }

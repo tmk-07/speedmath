@@ -69,6 +69,7 @@ npm run build
 - `src/lib/trends.js`: Trend chart data series.
 - `src/lib/progressStorage.js`: Local storage persistence.
 - `src/lib/syncApi.js`: Account sync client, legacy generated-code sync client, and local preview fallbacks.
+- `public/tkimifylight.png`: Footer logo asset from the tkimify footer kit.
 - `functions/_shared/syncHelpers.js`: Shared Cloudflare Function helpers for JSON, D1 validation, username/PIN hashing, sessions, and rate limits.
 - `functions/api/account/`: Cloudflare Pages Functions for username/PIN accounts.
 - `functions/api/sync/`: Legacy Cloudflare Pages Functions for sync codes.
@@ -155,6 +156,7 @@ Division:
 General:
 
 - Keep the app content inside the main square/rectangle container.
+- Show the tkimify logo link centered at the very bottom of the page, outside the main game shell, linking to `https://tkimify.com`.
 - Do not turn small footer-style actions into separate boxes unless there is a strong reason.
 - Keep controls compact when they are secondary, such as the analytics preset dropdown.
 - On analytics, the preset selector belongs in the same top row as the back arrow, "Analytics" label, and Trends/Summary button.
