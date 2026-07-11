@@ -157,6 +157,8 @@ General:
 
 - Keep the app content inside the main square/rectangle container.
 - Show the tkimify logo link centered at the very bottom of the page, outside the main game shell, linking to `https://tkimify.com`.
+- The tkimify footer hover color should use the Synapse accent green, not the original kit gold.
+- On short pages, the footer should sit near the bottom of the viewport without creating extra blank scroll space.
 - Do not turn small footer-style actions into separate boxes unless there is a strong reason.
 - Keep controls compact when they are secondary, such as the analytics preset dropdown.
 - On analytics, the preset selector belongs in the same top row as the back arrow, "Analytics" label, and Trends/Summary button.

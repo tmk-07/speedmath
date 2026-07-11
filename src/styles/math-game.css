@@ -21,14 +21,17 @@ html, body, #root {
   background:
     repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
     var(--bg);
-  min-height: 100vh;
-  padding: 32px 16px 64px;
+  min-height: 100svh;
+  padding: 32px 16px 14px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 .mm-app *, .mm-app *::before, .mm-app *::after { box-sizing: border-box; }
 .mm-app ::selection { background: rgba(69,224,176,0.35); }
 
 .mm-shell {
+  width: 100%;
   max-width: 640px;
   margin: 0 auto;
   display: flex;
@@ -41,7 +44,9 @@ html, body, #root {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 22px;
+  margin-top: auto;
+  padding-top: 22px;
+  flex: 0 0 auto;
 }
 
 .tkimify-footer-link {
@@ -59,7 +64,7 @@ html, body, #root {
 }
 
 .tkimify-footer-link:hover {
-  color: #E8B84B;
+  color: var(--accent);
   opacity: 1;
 }
 
