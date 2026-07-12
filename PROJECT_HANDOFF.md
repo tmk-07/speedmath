@@ -69,6 +69,7 @@ npm run build
 - `src/lib/trends.js`: Trend chart data series.
 - `src/lib/progressStorage.js`: Local storage persistence.
 - `src/lib/syncApi.js`: Account sync client, legacy generated-code sync client, and local preview fallbacks.
+- `public/synapselogo.png`: Synapse logo used as favicon/app icon.
 - `public/tkimifylight.png`: Footer logo asset from the tkimify footer kit.
 - `functions/_shared/syncHelpers.js`: Shared Cloudflare Function helpers for JSON, D1 validation, username/PIN hashing, sessions, and rate limits.
 - `functions/api/account/`: Cloudflare Pages Functions for username/PIN accounts.
