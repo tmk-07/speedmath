@@ -200,6 +200,8 @@ Preset filtering:
 
 Summary:
 
+- Summary has an All / Last 3 / Last 5 / Last 10 games selector, defaulting to All.
+- Every summary average and breakdown must use only the games included by that selector.
 - Do not show accuracy or attempted counts as primary values.
 - Use average response time.
 - By-operation summary bars should use operation colors.
@@ -233,6 +235,8 @@ Trends:
 
 - Analytics has a Trends button.
 - Trends has options for all games, last 3, last 5, and last 10 games.
+- Summary and Trends share the same current game-range selection when switching views.
+- Trend chart Y axes should use a padded range derived from the visible data instead of always starting at zero, so small changes remain readable.
 - The first trend graph should be Score.
 - Other trend graphs should show seconds taken, not percent correct.
 - Each section gets its own graph.
@@ -265,6 +269,8 @@ Username/PIN account sync:
 - Store only a session token hash in D1; the browser keeps the session token in localStorage.
 - Login is rate limited to 10 failed PIN attempts per username per 15-minute window.
 - Account progress auto-saves to D1 after sign-in.
+- Signed-in users can permanently delete their account and saved progress from the progress panel after an explicit confirmation.
+- Account deletion must authenticate the current session, remove the D1 account record and login-rate-limit record, then reset local progress to a fresh state.
 - On local preview, account sync has a browser-only fallback so the flow can be tested without Cloudflare.
 - The old generated-code API still exists for compatibility, but it is no longer the visible product flow.
 - On Cloudflare, account sync should use Pages Functions and D1.

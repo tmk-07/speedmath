@@ -178,6 +178,16 @@ function saveLocalAccount(username, token, progress) {
   return { ok: true, localOnly: true };
 }
 
+function deleteLocalAccount(username, token) {
+  const accounts = localAccounts();
+  const normalized = normalizeUsername(username);
+  const account = accounts[normalized];
+  if (!account || account.token !== token) throw new Error("Sign in again to delete your data.");
+  delete accounts[normalized];
+  saveLocalAccounts(accounts);
+  return { ok: true, localOnly: true };
+}
+
 async function accountRequest(path, body) {
   return requestJson(path, body);
 }
@@ -222,6 +232,19 @@ export async function logoutAccount(account) {
     });
   } catch (error) {
     if (isLocalPreview()) return { ok: true, localOnly: true };
+    throw error;
+  }
+}
+
+export async function deleteAccount(account) {
+  if (!account?.username || !account?.token) throw new Error("Sign in again to delete your data.");
+  try {
+    return await accountRequest("/api/account/delete", {
+      username: account.username,
+      token: account.token,
+    });
+  } catch (error) {
+    if (isLocalPreview()) return deleteLocalAccount(account.username, account.token);
     throw error;
   }
 }

@@ -28,7 +28,7 @@ const TREND_LIMITS = [
 
 export function AnalyticsPage({ presets, sessions, activePresetId, onBack }) {
   const [viewMode, setViewMode] = useState("summary");
-  const [trendLimit, setTrendLimit] = useState("all");
+  const [gameLimit, setGameLimit] = useState("all");
   const [selectedPresetId, setSelectedPresetId] = useState(activePresetId);
   const sessionCountsByPreset = useMemo(
     () =>
@@ -42,48 +42,48 @@ export function AnalyticsPage({ presets, sessions, activePresetId, onBack }) {
     () => sessions.filter((session) => session.presetId === selectedPresetId),
     [selectedPresetId, sessions]
   );
-  const filteredAttempts = useMemo(() => filteredSessions.flatMap((session) => session.attempts), [filteredSessions]);
+  const visibleSessions = useMemo(() => recentSessions(filteredSessions, gameLimit), [filteredSessions, gameLimit]);
+  const filteredAttempts = useMemo(() => visibleSessions.flatMap((session) => session.attempts), [visibleSessions]);
   const selectedPreset = presets.find((preset) => preset.id === selectedPresetId) || presets[0];
   const presetLabel = (preset) => {
     const count = sessionCountsByPreset[preset.id] || 0;
     return `${preset.name} (${count} game${count === 1 ? "" : "s"})`;
   };
   const analytics = useMemo(() => computeAnalytics(filteredAttempts), [filteredAttempts]);
-  const trendSessions = useMemo(() => recentSessions(filteredSessions, trendLimit), [filteredSessions, trendLimit]);
   const trendCharts = useMemo(
     () => [
       {
         title: "Score",
         metric: "score",
-        series: scoreTrendSeries(trendSessions),
+        series: scoreTrendSeries(visibleSessions),
       },
       {
         title: "By operation",
         metric: "seconds",
-        series: buildTrendSeries(trendSessions, operationTrendDefinitions()),
+        series: buildTrendSeries(visibleSessions, operationTrendDefinitions()),
       },
       {
         title: "Addition breakdown",
         metric: "seconds",
-        series: buildTrendSeries(trendSessions, regroupTrendDefinitions("addition")),
+        series: buildTrendSeries(visibleSessions, regroupTrendDefinitions("addition")),
       },
       {
         title: "Subtraction breakdown",
         metric: "seconds",
-        series: buildTrendSeries(trendSessions, regroupTrendDefinitions("subtraction")),
+        series: buildTrendSeries(visibleSessions, regroupTrendDefinitions("subtraction")),
       },
       {
         title: "Multiplication by factor",
         metric: "seconds",
-        series: buildTrendSeries(trendSessions, factorTrendDefinitions("multiplication")),
+        series: buildTrendSeries(visibleSessions, factorTrendDefinitions("multiplication")),
       },
       {
         title: "Division by divisor",
         metric: "seconds",
-        series: buildTrendSeries(trendSessions, factorTrendDefinitions("division")),
+        series: buildTrendSeries(visibleSessions, factorTrendDefinitions("division")),
       },
     ],
-    [trendSessions]
+    [visibleSessions]
   );
 
   if (sessions.length === 0) {
@@ -132,36 +132,44 @@ export function AnalyticsPage({ presets, sessions, activePresetId, onBack }) {
         </Button>
       </div>
 
-      {filteredAttempts.length === 0 && (
+      {filteredSessions.length === 0 && (
         <Card>
           <div className="mm-empty">No games played with {selectedPreset?.name || "this preset"} yet.</div>
         </Card>
       )}
 
+      {filteredSessions.length > 0 && (
+        <Card>
+          <div className="mm-trend-controls">
+            <span className="mm-field-title">Games included</span>
+            <div className="mm-segmented">
+              {TREND_LIMITS.map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`mm-segbtn${gameLimit === value ? " mm-segbtn-active" : ""}`}
+                  onClick={() => setGameLimit(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
+
       {filteredAttempts.length > 0 && viewMode === "trends" && (
         <>
-          <Card>
-            <div className="mm-trend-controls">
-              <span className="mm-field-title">Last games</span>
-              <div className="mm-segmented">
-                {TREND_LIMITS.map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`mm-segbtn${trendLimit === value ? " mm-segbtn-active" : ""}`}
-                    onClick={() => setTrendLimit(value)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </Card>
-
           {trendCharts.map((chart) => (
-            <TrendChart key={chart.title} title={chart.title} sessions={trendSessions} series={chart.series} metric={chart.metric} />
+            <TrendChart key={chart.title} title={chart.title} sessions={visibleSessions} series={chart.series} metric={chart.metric} />
           ))}
         </>
+      )}
+
+      {filteredSessions.length > 0 && filteredAttempts.length === 0 && (
+        <Card>
+          <div className="mm-empty">No attempts were recorded in the selected games.</div>
+        </Card>
       )}
 
       {filteredAttempts.length > 0 && viewMode === "summary" && (

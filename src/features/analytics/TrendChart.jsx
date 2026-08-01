@@ -9,26 +9,44 @@ function formatScoreAxis(value) {
   return String(Math.round(value));
 }
 
-function chartMax(series) {
-  const maxValue = Math.max(
-    0,
-    ...series.flatMap((item) => item.values.filter(Boolean).map((point) => point.value))
-  );
-  if (maxValue <= 1) return 1;
-  if (maxValue <= 5) return Math.ceil(maxValue * 2) / 2;
-  return Math.ceil(maxValue);
+function chartDomain(series, metric) {
+  const values = series.flatMap((item) => item.values.filter(Boolean).map((point) => point.value));
+  if (values.length === 0) return { min: 0, max: 1 };
+
+  const rawMin = Math.min(...values);
+  const rawMax = Math.max(...values);
+  const spread = rawMax - rawMin;
+  const padding = spread > 0
+    ? spread * 0.12
+    : metric === "score"
+      ? Math.max(1, Math.abs(rawMax) * 0.05)
+      : Math.max(0.25, Math.abs(rawMax) * 0.1);
+
+  let min = Math.max(0, rawMin - padding);
+  let max = rawMax + padding;
+
+  if (metric === "score") {
+    min = Math.floor(min);
+    max = Math.ceil(max);
+  } else {
+    min = Math.floor(min * 10) / 10;
+    max = Math.ceil(max * 10) / 10;
+  }
+
+  if (max <= min) max = min + (metric === "score" ? 2 : 0.5);
+  return { min, max };
 }
 
-function valuePoint(value, index, count, maxValue) {
+function valuePoint(value, index, count, domain) {
   const chart = { left: 38, right: 12, top: 14, bottom: 30, width: 640, height: 220 };
   const plotWidth = chart.width - chart.left - chart.right;
   const plotHeight = chart.height - chart.top - chart.bottom;
   const x = count <= 1 ? chart.left + plotWidth / 2 : chart.left + (index / (count - 1)) * plotWidth;
-  const y = chart.top + (1 - value / maxValue) * plotHeight;
+  const y = chart.top + ((domain.max - value) / (domain.max - domain.min)) * plotHeight;
   return { x, y };
 }
 
-function linePath(values, maxValue) {
+function linePath(values, domain) {
   let openSegment = false;
   return values
     .map((point, index) => {
@@ -36,7 +54,7 @@ function linePath(values, maxValue) {
         openSegment = false;
         return "";
       }
-      const next = valuePoint(point.value, index, values.length, maxValue);
+      const next = valuePoint(point.value, index, values.length, domain);
       const command = openSegment ? "L" : "M";
       openSegment = true;
       return `${command} ${next.x.toFixed(1)} ${next.y.toFixed(1)}`;
@@ -59,8 +77,8 @@ export function TrendChart({ title, sessions, series, metric = "seconds" }) {
   const hiddenSet = useMemo(() => new Set(hiddenLabels), [hiddenLabels]);
   const visibleSeries = series.filter((item) => item.values.some(Boolean) && !hiddenSet.has(item.label));
   const xIndexes = xLabelIndexes(sessions.length);
-  const maxValue = chartMax(visibleSeries);
-  const yTicks = [maxValue, maxValue / 2, 0];
+  const domain = chartDomain(visibleSeries, metric);
+  const yTicks = [domain.max, (domain.max + domain.min) / 2, domain.min];
 
   function toggleSeries(label) {
     setHiddenLabels((current) => (current.includes(label) ? current.filter((item) => item !== label) : [...current, label]));
@@ -94,7 +112,7 @@ export function TrendChart({ title, sessions, series, metric = "seconds" }) {
 
       <svg className="mm-trend-chart" viewBox="0 0 640 220" role="img" aria-label={`${title} trend chart`}>
         {yTicks.map((tick) => {
-          const y = valuePoint(tick, 0, 1, maxValue).y;
+          const y = valuePoint(tick, 0, 1, domain).y;
           return (
             <g key={tick}>
               <line x1="38" x2="628" y1={y} y2={y} className="mm-trend-grid" />
@@ -106,7 +124,7 @@ export function TrendChart({ title, sessions, series, metric = "seconds" }) {
         })}
 
         {xIndexes.map((index) => {
-          const point = valuePoint(0, index, sessions.length, maxValue);
+          const point = valuePoint(domain.min, index, sessions.length, domain);
           return (
             <text key={index} x={point.x} y="214" className="mm-trend-axis mm-trend-axis-x">
               G{index + 1}
@@ -122,10 +140,10 @@ export function TrendChart({ title, sessions, series, metric = "seconds" }) {
 
         {visibleSeries.map((item) => (
           <g key={item.label}>
-            <path d={linePath(item.values, maxValue)} className="mm-trend-line" style={{ stroke: item.color }} />
+            <path d={linePath(item.values, domain)} className="mm-trend-line" style={{ stroke: item.color }} />
             {item.values.map((point, index) => {
               if (!point) return null;
-              const coords = valuePoint(point.value, index, item.values.length, maxValue);
+              const coords = valuePoint(point.value, index, item.values.length, domain);
               return <circle key={index} cx={coords.x} cy={coords.y} r="3.5" className="mm-trend-dot" style={{ fill: item.color }} />;
             })}
           </g>

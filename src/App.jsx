@@ -83,6 +83,18 @@ export default function App() {
     });
   }
 
+  function deleteAllProgress() {
+    const nextPresets = makeInitialPresets();
+    setPresets(nextPresets);
+    setActivePresetId(nextPresets[0].id);
+    setSessions([]);
+    setLastSession(null);
+    setSyncCode("");
+    setSyncAccount(null);
+    setSyncStatus("");
+    setView("landing");
+  }
+
   function finishGame(session) {
     setSessions((current) => [...current, session]);
     setLastSession(session);
@@ -148,6 +160,7 @@ export default function App() {
           syncStatus={syncStatus}
           onSetSyncAccount={setSyncAccount}
           onLoadProgress={loadProgressFromAccount}
+          onDeleteProgress={deleteAllProgress}
         />
       </div>
       <footer className="tkimify-footer">
