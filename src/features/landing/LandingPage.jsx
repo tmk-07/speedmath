@@ -1,11 +1,21 @@
-import { BarChart2, Play, Settings as SettingsIcon } from "lucide-react";
+import { BarChart2, Crosshair, Play, Settings as SettingsIcon } from "lucide-react";
 import { Button } from "../../components/Button.jsx";
 import { Card } from "../../components/Card.jsx";
 import { Eyebrow } from "../../components/Eyebrow.jsx";
 import { OP_META, OP_ORDER } from "../../lib/constants.js";
 import { enabledOps } from "../../lib/problems.js";
 
-export function LandingPage({ presets, activePresetId, onSelectPreset, onStart, onGoSettings, onGoAnalytics, hasHistory }) {
+export function LandingPage({
+  presets,
+  activePresetId,
+  onSelectPreset,
+  onStart,
+  onStartFocus,
+  onGoSettings,
+  onGoAnalytics,
+  hasHistory,
+  focusPlan,
+}) {
   const activePreset = presets.find((preset) => preset.id === activePresetId) || presets[0];
   const nOps = enabledOps(activePreset).length;
 
@@ -61,6 +71,9 @@ export function LandingPage({ presets, activePresetId, onSelectPreset, onStart, 
           </Button>
           <Button variant="secondary" icon={SettingsIcon} onClick={onGoSettings} full>
             Settings
+          </Button>
+          <Button variant="secondary" icon={Crosshair} onClick={onStartFocus} disabled={!focusPlan.eligible} full>
+            {focusPlan.eligible ? "Target Weaknesses" : `Target Weaknesses (${focusPlan.regularGameCount}/5 games)`}
           </Button>
           <Button variant="ghost" icon={BarChart2} onClick={onGoAnalytics} full disabled={!hasHistory}>
             {hasHistory ? "View Analytics" : "Analytics (play a game first)"}

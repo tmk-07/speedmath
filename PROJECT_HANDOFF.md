@@ -231,6 +231,16 @@ Slowest areas:
 - Example layout: `4.5s x12`, with a colored bar underneath.
 - Slowest area colors should use the operation/category color, not speed-based colors.
 
+Target Weaknesses:
+
+- Target Weaknesses unlocks after five regular games with the selected preset.
+- The home screen shows the mode below Settings and above View Analytics, and Summary shows a Target Weaknesses button under Slowest Areas.
+- The plan is recalculated from the most recent 10 regular games for that preset and contains up to eight slow areas.
+- The top three areas receive 80% of targeted problems; ranks 4 through 8 share the remaining 20%.
+- Targeted sessions use `mode: "focus"` and each attempt records `targetAreaId`.
+- Targeted sessions do not influence the regular-game weakness ranking, preventing the training mix from feeding back into its own selection.
+- Analytics has separate Summary, Trends, and Focus sections controlled by one top-right button that cycles Summary to Trends to Focus and back to Summary. Focus lists the current plan and charts targeted-area response times across focus sessions.
+
 Trends:
 
 - Analytics has a Trends button.

@@ -9,6 +9,7 @@ import { uid } from "./lib/id.js";
 import { loadProgress, progressPayload, saveProgress } from "./lib/progressStorage.js";
 import { ensureBuiltInPresets, makeInitialPresets, clonePreset } from "./lib/presets.js";
 import { saveAccountProgress } from "./lib/syncApi.js";
+import { buildFocusPlan } from "./lib/targeting.js";
 
 export default function App() {
   const [savedProgress] = useState(() => loadProgress());
@@ -21,9 +22,11 @@ export default function App() {
   const [syncCode, setSyncCode] = useState(savedProgress.syncCode);
   const [syncAccount, setSyncAccount] = useState(savedProgress.syncAccount);
   const [syncStatus, setSyncStatus] = useState("");
+  const [gameMode, setGameMode] = useState("regular");
 
   const activePreset = presets.find((preset) => preset.id === activePresetId) || presets[0];
   const allAttempts = useMemo(() => sessions.flatMap((session) => session.attempts), [sessions]);
+  const focusPlan = useMemo(() => buildFocusPlan(sessions, activePresetId), [activePresetId, sessions]);
   const currentProgress = useMemo(
     () => ({ presets, activePresetId, sessions, syncCode, syncAccount }),
     [activePresetId, presets, sessions, syncAccount, syncCode]
@@ -101,6 +104,13 @@ export default function App() {
     setView("results");
   }
 
+  function startGame(mode = "regular", presetId = activePresetId) {
+    setActivePresetId(presetId);
+    setGameMode(mode);
+    setGameKey((key) => key + 1);
+    setView("game");
+  }
+
   return (
     <div className="mm-app">
       <div className="mm-shell">
@@ -109,13 +119,12 @@ export default function App() {
             presets={presets}
             activePresetId={activePresetId}
             onSelectPreset={setActivePresetId}
-            onStart={() => {
-              setGameKey((key) => key + 1);
-              setView("game");
-            }}
+            onStart={() => startGame("regular")}
+            onStartFocus={() => startGame("focus")}
             onGoSettings={() => setView("settings")}
             onGoAnalytics={() => setView("analytics")}
             hasHistory={allAttempts.length > 0}
+            focusPlan={focusPlan}
           />
         )}
 
@@ -131,7 +140,15 @@ export default function App() {
           />
         )}
 
-        {view === "game" && <GamePage key={gameKey} preset={activePreset} onFinish={finishGame} />}
+        {view === "game" && (
+          <GamePage
+            key={gameKey}
+            preset={activePreset}
+            mode={gameMode}
+            targetAreas={gameMode === "focus" ? focusPlan.areas : []}
+            onFinish={finishGame}
+          />
+        )}
 
         {view === "results" && lastSession && (
           <ResultsPage
@@ -151,6 +168,7 @@ export default function App() {
             sessions={sessions}
             activePresetId={activePresetId}
             onBack={() => setView("landing")}
+            onStartFocus={(presetId) => startGame("focus", presetId)}
           />
         )}
 

@@ -60,28 +60,28 @@ export function computeAnalytics(attempts) {
   const minAttempts = 1;
 
   [
-    ["addition", "regrouping", "Addition w/ regrouping"],
-    ["addition", "noRegrouping", "Addition, no regrouping"],
-    ["subtraction", "regrouping", "Subtraction w/ borrowing"],
-    ["subtraction", "noRegrouping", "Subtraction, no borrowing"],
-  ].forEach(([op, key, label]) => {
+    ["addition", "regrouping", "addition:regrouping", "Addition w/ regrouping"],
+    ["addition", "noRegrouping", "addition:no-regrouping", "Addition, no regrouping"],
+    ["subtraction", "regrouping", "subtraction:borrowing", "Subtraction w/ borrowing"],
+    ["subtraction", "noRegrouping", "subtraction:no-borrowing", "Subtraction, no borrowing"],
+  ].forEach(([op, key, id, label]) => {
     const source = op === "addition" ? addition : subtraction;
     if (source[key].attempted >= minAttempts) {
-      weakAreas.push({ label, stats: source[key], color: OP_META[op].color });
+      weakAreas.push({ id, operation: op, label, stats: source[key], color: OP_META[op].color });
     }
   });
 
   Object.entries(multiplication).forEach(([k, stats]) => {
     const factor = Number(k);
     if (factor >= 1 && factor <= 12 && stats.attempted >= minAttempts) {
-      weakAreas.push({ label: `\u00D7${k}`, stats, color: OP_META.multiplication.color });
+      weakAreas.push({ id: `multiplication:${k}`, operation: "multiplication", label: `\u00D7${k}`, stats, color: OP_META.multiplication.color });
     }
   });
 
   Object.entries(division).forEach(([k, stats]) => {
     const divisor = Number(k);
     if (divisor >= 1 && divisor <= 12 && stats.attempted >= minAttempts) {
-      weakAreas.push({ label: `\u00F7${k}`, stats, color: OP_META.division.color });
+      weakAreas.push({ id: `division:${k}`, operation: "division", label: `\u00F7${k}`, stats, color: OP_META.division.color });
     }
   });
 
@@ -94,6 +94,7 @@ export function computeAnalytics(attempts) {
     multiplication,
     division,
     weakAreas: weakAreas.slice(0, 6),
+    allWeakAreas: weakAreas,
     totalAttempted: attempts.length,
   };
 }
