@@ -1,43 +1,95 @@
-# Speed Math
+**Math Game**
 
-React MVP for a mental math drill game.
+An interactive quick mental math app designed for efficient practice using analytics to hone in on weaknesses.
 
-## Preview locally
+**Live site:** [synapse.tkimify.com](https://synapse.tkimify.com)
 
-1. Install dependencies:
+**Features**
 
-   ```bash
-   npm install
-   ```
+- Gamified mental math practice sessions
+- Ability to change question set, save presets 
+- Score, accuracy, and progress tracking
+- Target Weaknesses mode for personalized practice
+- Performance-based identification of weaker math skills
+- Account registration and login
+- Persistent user progress across sessions
+- Personalized practice history
+- Secure logout and session handling
+- Responsive design for desktop and mobile devices
+- Reusable React components
+- Fast development and production builds with Vite
 
-2. Start the preview server:
+**Technical Architecture**
 
-   ```bash
-   npm run dev
-   ```
+The client application is built with React and bundled with Vite. React components manage the game interface, authentication flow, question presentation, answer feedback, and session results.
 
-3. Open the local URL Vite prints, usually:
+The game engine is responsible for:
 
-   ```text
-   http://localhost:5173
-   ```
+- Generating math problems
+- Applying question set preset settings
+- Validating submitted answers
+- Recording correct and incorrect responses
+- Calculating scores and accuracy
+- Categorizing performance by mathematical operation
+- Selecting questions for Target Weaknesses sessions
 
-## Project structure
+The authentication and persistence layer handles:
 
-- `src/App.jsx` controls which screen is visible and owns app-level state.
-- `src/features/landing` contains the start screen.
-- `src/features/game` contains the live game screen.
-- `src/features/settings` contains presets and operation settings.
-- `src/features/results` contains the post-game summary.
-- `src/features/analytics` contains full analytics views.
-- `src/components` contains small reusable UI pieces.
-- `src/lib` contains expandable game logic, analytics, presets, IDs, and formatting helpers.
-- `src/styles/math-game.css` contains the visual styling from the MVP.
-- `functions/api/sync` contains Cloudflare Pages Functions for generated-code progress sync.
-- `migrations/0001_progress_codes.sql` contains the D1 table for sync codes.
+- User registration and login
+- Authenticated sessions
+- Saved player progress
+- Practice history
+- Skill-performance data
+- Personalized weakness targeting
 
-## Progress saving
+**Technology**
 
-The app always saves progress locally in the browser with `localStorage`.
+- React
+- JavaScript
+- Vite
+- CSS3
+- Lucide React
+- npm
+- User authentication
+- Persistent player data
 
-Generated-code sync is Cloudflare-ready. To enable it on Cloudflare Pages, create a D1 database, run the SQL in `migrations/0001_progress_codes.sql`, and bind that database to the Pages project as `DB`.
+**Project Structure**
+
+```text
+.
+├── public/
+│   ├── synapselogo.png          # Synapse favicon and application logo
+│   └── tkimifylight.png         # Footer branding
+├── src/
+│   ├── components/              # Reusable interface components
+│   ├── features/
+│   │   ├── analytics/           # Summaries, trends, and weakness analytics
+│   │   ├── game/                # Timed mental-math gameplay
+│   │   ├── landing/             # Main menu and game-mode selection
+│   │   ├── progress/            # Account and progress-saving interface
+│   │   ├── results/             # Post-game results
+│   │   └── settings/            # Presets and operation settings
+│   ├── lib/
+│   │   ├── analytics.js         # Performance analysis
+│   │   ├── problems.js          # Math-problem generation
+│   │   ├── progressStorage.js   # Local progress persistence
+│   │   ├── syncApi.js           # Account and cloud-sync client
+│   │   ├── targeting.js         # Target Weaknesses selection logic
+│   │   └── trends.js            # Historical trend calculations
+│   ├── styles/
+│   │   └── math-game.css        # Application visual system
+│   ├── App.jsx                  # Application state and navigation
+│   └── main.jsx                 # React entry point
+├── functions/
+│   ├── _shared/                 # Shared API and database helpers
+│   └── api/
+│       ├── account/             # Login, registration, saving, and deletion
+│       └── sync/                # Cloudflare progress-sync endpoints
+├── migrations/
+│   ├── 0001_progress_codes.sql  # Legacy progress-code schema
+│   └── 0002_accounts.sql        # User-account schema
+├── index.html                   # Application HTML entry point
+├── package.json                 # Dependencies and project scripts
+├── vite.config.mjs              # Vite configuration
+└── wrangler.toml                # Cloudflare Pages and D1 configuration
+```
