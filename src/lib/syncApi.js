@@ -225,3 +225,14 @@ export async function logoutAccount(account) {
     throw error;
   }
 }
+
+export async function deleteAccount(account) {
+  if (!account?.username || !account?.token) throw new Error("Sign in again to delete your data.");
+  if (isLocalPreview()) {
+    throw new Error("Data deletion is disabled while testing locally.");
+  }
+  return accountRequest("/api/account/delete", {
+    username: account.username,
+    token: account.token,
+  });
+}

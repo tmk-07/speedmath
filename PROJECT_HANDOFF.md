@@ -200,6 +200,8 @@ Preset filtering:
 
 Summary:
 
+- Summary has an All / Last 3 / Last 5 / Last 10 games selector, defaulting to All.
+- Every summary average and breakdown must use only the games included by that selector.
 - Do not show accuracy or attempted counts as primary values.
 - Use average response time.
 - By-operation summary bars should use operation colors.
@@ -229,10 +231,22 @@ Slowest areas:
 - Example layout: `4.5s x12`, with a colored bar underneath.
 - Slowest area colors should use the operation/category color, not speed-based colors.
 
+Target Weaknesses:
+
+- Target Weaknesses unlocks after five regular games with the selected preset.
+- The home screen shows the mode below Settings and above View Analytics, and Summary shows a Target Weaknesses button under Slowest Areas.
+- The plan is recalculated from the most recent 10 regular games for that preset and contains up to eight slow areas.
+- The top three areas receive 80% of targeted problems; ranks 4 through 8 share the remaining 20%.
+- Targeted sessions use `mode: "focus"` and each attempt records `targetAreaId`.
+- Targeted sessions do not influence the regular-game weakness ranking, preventing the training mix from feeding back into its own selection.
+- Analytics has separate Summary, Trends, and Focus sections controlled by one top-right button that cycles Summary to Trends to Focus and back to Summary. Focus lists the current plan and charts targeted-area response times across focus sessions.
+
 Trends:
 
 - Analytics has a Trends button.
 - Trends has options for all games, last 3, last 5, and last 10 games.
+- Summary and Trends share the same current game-range selection when switching views.
+- Trend chart Y axes should use a padded range derived from the visible data instead of always starting at zero, so small changes remain readable.
 - The first trend graph should be Score.
 - Other trend graphs should show seconds taken, not percent correct.
 - Each section gets its own graph.
@@ -265,6 +279,8 @@ Username/PIN account sync:
 - Store only a session token hash in D1; the browser keeps the session token in localStorage.
 - Login is rate limited to 10 failed PIN attempts per username per 15-minute window.
 - Account progress auto-saves to D1 after sign-in.
+- Signed-in users can permanently delete their account and saved progress from the progress panel after an explicit confirmation.
+- Account deletion must authenticate the current session, remove the D1 account record and login-rate-limit record, then reset local progress to a fresh state.
 - On local preview, account sync has a browser-only fallback so the flow can be tested without Cloudflare.
 - The old generated-code API still exists for compatibility, but it is no longer the visible product flow.
 - On Cloudflare, account sync should use Pages Functions and D1.

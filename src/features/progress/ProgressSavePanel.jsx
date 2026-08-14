@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { ArrowLeft, LogOut, UserPlus, LogIn } from "lucide-react";
+import { ArrowLeft, LogOut, UserPlus, LogIn, Trash2 } from "lucide-react";
 import { Button } from "../../components/Button.jsx";
 import { Card } from "../../components/Card.jsx";
-import { loginAccount, logoutAccount, registerAccount } from "../../lib/syncApi.js";
+import { deleteAccount, loginAccount, logoutAccount, registerAccount } from "../../lib/syncApi.js";
 
-export function ProgressSavePanel({ progress, syncAccount, onSetSyncAccount, onLoadProgress }) {
+export function ProgressSavePanel({ progress, syncAccount, onSetSyncAccount, onLoadProgress, onDeleteProgress }) {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   function closePanel() {
     setOpen(false);
     setMessage("");
+    setConfirmingDelete(false);
   }
 
   function cleanPin(value) {
@@ -62,6 +64,23 @@ export function ProgressSavePanel({ progress, syncAccount, onSetSyncAccount, onL
       await logoutAccount(account);
     } catch {
       // Local sign-out should still complete even if the network is unavailable.
+    }
+  }
+
+  async function handleDeleteData() {
+    setBusy(true);
+    setMessage("");
+    try {
+      await deleteAccount(syncAccount);
+      onDeleteProgress();
+      setConfirmingDelete(false);
+      setUsername("");
+      setPin("");
+      setMessage("Your account and saved progress have been deleted.");
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -117,9 +136,28 @@ export function ProgressSavePanel({ progress, syncAccount, onSetSyncAccount, onL
                   </Button>
                 </div>
                 {syncAccount?.username && (
-                  <Button variant="ghost" icon={LogOut} onClick={handleSignOut} disabled={busy}>
-                    Sign Out
-                  </Button>
+                  <>
+                    <Button variant="ghost" icon={LogOut} onClick={handleSignOut} disabled={busy}>
+                      Sign Out
+                    </Button>
+                    {!confirmingDelete ? (
+                      <Button variant="danger-ghost" icon={Trash2} onClick={() => setConfirmingDelete(true)} disabled={busy}>
+                        Delete My Data
+                      </Button>
+                    ) : (
+                      <div className="mm-delete-confirm" role="alert">
+                        <p>This permanently deletes your account and all saved progress. This cannot be undone.</p>
+                        <div className="mm-progress-button-row">
+                          <Button variant="ghost" onClick={() => setConfirmingDelete(false)} disabled={busy}>
+                            Cancel
+                          </Button>
+                          <Button variant="danger" icon={Trash2} onClick={handleDeleteData} disabled={busy}>
+                            Yes, Delete My Data
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

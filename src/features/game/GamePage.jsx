@@ -3,13 +3,21 @@ import { OP_META } from "../../lib/constants.js";
 import { uid } from "../../lib/id.js";
 import { formatSeconds, randInt } from "../../lib/number.js";
 import { enabledOps, generateProblem, problemText } from "../../lib/problems.js";
+import { chooseFocusArea, generateFocusProblem } from "../../lib/targeting.js";
 
-export function GamePage({ preset, onFinish }) {
+export function GamePage({ preset, mode = "regular", targetAreas = [], onFinish }) {
   const opsPool = useMemo(() => enabledOps(preset), [preset]);
+  const makeProblem = useCallback(() => {
+    if (mode === "focus" && targetAreas.length > 0) {
+      return generateFocusProblem(chooseFocusArea(targetAreas), preset);
+    }
+    const op = opsPool[randInt(0, opsPool.length - 1)];
+    return generateProblem(op, preset.operations[op]);
+  }, [mode, opsPool, preset, targetAreas]);
   const [timeLeft, setTimeLeft] = useState(preset.duration);
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState([]);
-  const [problem, setProblem] = useState(() => generateProblem(opsPool[0], preset.operations[opsPool[0]]));
+  const [problem, setProblem] = useState(makeProblem);
   const [input, setInput] = useState("");
   const [feedback, setFeedback] = useState(null);
   const startedAtRef = useRef(Date.now());
@@ -25,11 +33,10 @@ export function GamePage({ preset, onFinish }) {
   }, [problem]);
 
   const nextProblem = useCallback(() => {
-    const op = opsPool[randInt(0, opsPool.length - 1)];
-    setProblem(generateProblem(op, preset.operations[op]));
+    setProblem(makeProblem());
     setInput("");
     problemStartRef.current = Date.now();
-  }, [opsPool, preset]);
+  }, [makeProblem]);
 
   const finish = useCallback(
     (finalAttempts, finalScore) => {
@@ -44,9 +51,11 @@ export function GamePage({ preset, onFinish }) {
         endedAt: Date.now(),
         attempts: finalAttempts,
         score: finalScore,
+        mode,
+        targetAreaIds: mode === "focus" ? targetAreas.map((area) => area.id) : [],
       });
     },
-    [onFinish, preset]
+    [mode, onFinish, preset, targetAreas]
   );
 
   useEffect(() => {
@@ -79,6 +88,7 @@ export function GamePage({ preset, onFinish }) {
       correct,
       responseTimeMs,
       timestamp: Date.now(),
+      targetAreaId: problem.targetAreaId || null,
     };
     attemptsRef.current = [...attemptsRef.current, attempt];
     scoreRef.current = correct ? scoreRef.current + 1 : scoreRef.current;
@@ -121,7 +131,7 @@ export function GamePage({ preset, onFinish }) {
 
       <div className={`mm-problem-card${feedback ? ` mm-flash-${feedback}` : ""}`}>
         <div className="mm-problem-op-tag" style={{ color: OP_META[problem.operation].color }}>
-          {OP_META[problem.operation].label}
+          {problem.targetAreaLabel ? `Target: ${problem.targetAreaLabel}` : OP_META[problem.operation].label}
         </div>
         <div className="mm-problem-digits">{problemText(problem)} =</div>
         <input
