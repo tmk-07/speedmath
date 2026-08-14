@@ -1,10 +1,10 @@
-*Mental Math Game
+# Mental Math Game
 
 An interactive quick mental math app designed for efficient practice using analytics to hone in on weaknesses.
 
 **Live site:** [synapse.tkimify.com](https://synapse.tkimify.com)
 
-**Features
+## Features
 
 - Gamified mental math practice sessions
 - Ability to change question set, save presets 
@@ -19,7 +19,7 @@ An interactive quick mental math app designed for efficient practice using analy
 - Reusable React components
 - Fast development and production builds with Vite
 
-**Technical Architecture
+## Technical Architecture
 
 The client application is built with React and bundled with Vite. React components manage the game interface, authentication flow, question presentation, answer feedback, and session results.
 
@@ -53,7 +53,7 @@ The authentication and persistence layer handles:
 - User authentication
 - Persistent player data
 
-**Project Structure
+## Project Structure
 
 ```text
 .
